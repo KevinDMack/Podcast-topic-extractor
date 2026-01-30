@@ -1,0 +1,88 @@
+{
+  "name": "Podcast Topic Extractor Sample Requests",
+  "description": "Sample API requests for testing the Podcast Topic Extractor functions",
+  "variables": {
+    "FUNCTION_APP_URL": "https://your-function-app.azurewebsites.net",
+    "FUNCTION_KEY": "your-function-key-here",
+    "SHOW_ID": "4rOoJ6Egrf8K2IrywzwOMk"
+  },
+  "requests": [
+    {
+      "name": "Get Podcast Episodes - Joe Rogan Experience",
+      "method": "POST",
+      "url": "{{FUNCTION_APP_URL}}/api/GetPodcastEpisodes?code={{FUNCTION_KEY}}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "show_id": "{{SHOW_ID}}",
+        "start_date": "2024-01-01",
+        "end_date": "2024-01-31",
+        "limit": 10
+      }
+    },
+    {
+      "name": "Get Podcast Episodes - Query Parameters",
+      "method": "GET",
+      "url": "{{FUNCTION_APP_URL}}/api/GetPodcastEpisodes?code={{FUNCTION_KEY}}&show_id={{SHOW_ID}}&start_date=2024-01-01&end_date=2024-01-31"
+    },
+    {
+      "name": "Extract Keywords from Blob",
+      "method": "POST",
+      "url": "{{FUNCTION_APP_URL}}/api/ExtractKeywords?code={{FUNCTION_KEY}}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "blob_name": "episodes_4rOoJ6Egrf8K2IrywzwOMk_20240130_120000.json",
+        "language": "en"
+      },
+      "note": "Replace blob_name with actual blob name from GetPodcastEpisodes response"
+    },
+    {
+      "name": "Extract Keywords from Direct Text",
+      "method": "POST",
+      "url": "{{FUNCTION_APP_URL}}/api/ExtractKeywords?code={{FUNCTION_KEY}}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "text": "In this episode, we dive deep into the world of artificial intelligence and machine learning. We discuss the latest advancements in natural language processing, computer vision, and deep learning. Our guest shares insights about building scalable ML systems and the ethical considerations of AI deployment in production environments.",
+        "language": "en"
+      }
+    }
+  ],
+  "curl_examples": [
+    {
+      "name": "Get Episodes (cURL)",
+      "command": "curl -X POST \"{{FUNCTION_APP_URL}}/api/GetPodcastEpisodes?code={{FUNCTION_KEY}}\" -H \"Content-Type: application/json\" -d '{\"show_id\":\"{{SHOW_ID}}\",\"start_date\":\"2024-01-01\",\"end_date\":\"2024-01-31\"}'"
+    },
+    {
+      "name": "Extract Keywords (cURL)",
+      "command": "curl -X POST \"{{FUNCTION_APP_URL}}/api/ExtractKeywords?code={{FUNCTION_KEY}}\" -H \"Content-Type: application/json\" -d '{\"text\":\"Sample podcast description about technology and innovation\"}'"
+    }
+  ],
+  "popular_shows": [
+    {
+      "name": "The Joe Rogan Experience",
+      "show_id": "4rOoJ6Egrf8K2IrywzwOMk",
+      "description": "One of the most popular podcasts"
+    },
+    {
+      "name": "TED Talks Daily",
+      "show_id": "1VyJkYO3UKYuRgGJlZiQ47",
+      "description": "TED Talks for daily listening"
+    },
+    {
+      "name": "The Daily",
+      "show_id": "3IM0lmZxpFAY7CwMuv9H4g",
+      "description": "News podcast from The New York Times"
+    }
+  ],
+  "notes": [
+    "Replace {{FUNCTION_APP_URL}} with your actual Function App URL",
+    "Replace {{FUNCTION_KEY}} with your actual function key",
+    "Get function key using: az functionapp keys list -g <resource-group> -n <function-app-name>",
+    "Find show_ids by right-clicking on a podcast in Spotify → Share → Copy Show Link"
+  ]
+}
