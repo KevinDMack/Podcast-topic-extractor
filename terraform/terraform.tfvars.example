@@ -1,0 +1,16 @@
+# Example terraform.tfvars file
+# Copy this file to terraform.tfvars and fill in your values
+
+# resource_group_name = "podcast-topic-extractor-rg"
+# location            = "eastus"
+# environment         = "dev"
+
+# Spotify API credentials (get from https://developer.spotify.com/dashboard)
+spotify_client_id     = "your-spotify-client-id"
+spotify_client_secret = "your-spotify-client-secret"
+
+# tags = {
+#   Project     = "PodcastTopicExtractor"
+#   Environment = "dev"
+#   ManagedBy   = "Terraform"
+# }
