@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "SPOTIFY_CLIENT_ID": "your-spotify-client-id",
+    "SPOTIFY_CLIENT_SECRET": "your-spotify-client-secret",
+    "TEXT_ANALYTICS_ENDPOINT": "https://your-resource.cognitiveservices.azure.com/",
+    "TEXT_ANALYTICS_KEY": "your-text-analytics-key",
+    "BLOB_STORAGE_ACCOUNT_URL": "https://your-storage-account.blob.core.windows.net/",
+    "BLOB_CONTAINER_NAME": "podcast-episodes"
+  }
+}
