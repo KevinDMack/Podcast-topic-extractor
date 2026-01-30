@@ -6,7 +6,8 @@
     "SPOTIFY_CLIENT_ID": "your-spotify-client-id",
     "SPOTIFY_CLIENT_SECRET": "your-spotify-client-secret",
     "TEXT_ANALYTICS_ENDPOINT": "https://your-resource.cognitiveservices.azure.com/",
-    "BLOB_STORAGE_CONNECTION_STRING": "your-blob-storage-connection-string",
+    "TEXT_ANALYTICS_KEY": "your-text-analytics-key",
+    "BLOB_STORAGE_ACCOUNT_URL": "https://your-storage-account.blob.core.windows.net/",
     "BLOB_CONTAINER_NAME": "podcast-episodes"
   }
 }

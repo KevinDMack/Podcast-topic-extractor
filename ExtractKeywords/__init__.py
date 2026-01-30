@@ -48,8 +48,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         key = os.environ.get('TEXT_ANALYTICS_KEY')
         
         if not endpoint:
+            logging.error("TEXT_ANALYTICS_ENDPOINT not configured in environment")
             return func.HttpResponse(
-                "TEXT_ANALYTICS_ENDPOINT not configured",
+                "Service configuration error",
                 status_code=500
             )
 
@@ -93,12 +94,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 logging.info(f"Loaded {len(episodes)} episodes from blob: {blob_name}")
                 
                 # Extract keywords for each episode
+                errors = []
                 for episode in episodes:
                     episode_text = f"{episode['name']}. {episode['description']}"
                     
                     # Limit text to 5120 characters (Text Analytics limit)
+                    truncated = False
                     if len(episode_text) > 5120:
                         episode_text = episode_text[:5120]
+                        truncated = True
                     
                     # Extract key phrases
                     response = text_analytics_client.extract_key_phrases(
@@ -113,9 +117,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                                 'release_date': episode['release_date'],
                                 'key_phrases': doc.key_phrases
                             }
+                            if truncated:
+                                result['warning'] = 'Text was truncated to 5120 characters'
                             results.append(result)
                         else:
-                            logging.error(f"Error analyzing episode {episode['id']}: {doc.error}")
+                            error_msg = f"Error analyzing episode {episode['id']}: {doc.error}"
+                            logging.error(error_msg)
+                            errors.append({
+                                'episode_id': episode['id'],
+                                'episode_name': episode['name'],
+                                'error': 'Failed to extract keywords'
+                            })
                 
             except Exception as e:
                 return func.HttpResponse(
@@ -181,6 +193,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             'results_count': len(results),
             'results': results
         }
+        
+        # Add errors if processing from blob
+        if blob_name and 'errors' in locals() and errors:
+            response_data['errors'] = errors
+            response_data['errors_count'] = len(errors)
 
         return func.HttpResponse(
             json.dumps(response_data, indent=2),
@@ -189,8 +206,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     except Exception as e:
-        logging.error(f"Error in ExtractKeywords: {str(e)}")
+        logging.error(f"Error in ExtractKeywords: {str(e)}", exc_info=True)
         return func.HttpResponse(
-            f"An error occurred: {str(e)}",
+            "An unexpected error occurred. Please check the logs or contact support.",
             status_code=500
         )

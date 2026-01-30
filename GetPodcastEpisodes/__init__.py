@@ -74,8 +74,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         client_secret = os.environ.get('SPOTIFY_CLIENT_SECRET')
         
         if not client_id or not client_secret:
+            logging.error("Spotify credentials not configured in environment")
             return func.HttpResponse(
-                "Spotify credentials not configured",
+                "Service configuration error",
                 status_code=500
             )
 
@@ -86,12 +87,28 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
         sp = spotipy.Spotify(auth_manager=auth_manager)
 
+        # Validate limit parameter
+        try:
+            limit_int = int(limit)
+            if limit_int <= 0 or limit_int > 50:
+                return func.HttpResponse(
+                    "limit must be a positive integer between 1 and 50",
+                    status_code=400
+                )
+        except ValueError:
+            return func.HttpResponse(
+                "limit must be a valid integer",
+                status_code=400
+            )
+        
         # Fetch episodes
         episodes = []
         offset = 0
-        limit_per_request = min(int(limit), 50)
+        limit_per_request = limit_int
+        max_iterations = 100  # Safety limit to prevent infinite loops
+        iteration_count = 0
         
-        while True:
+        while iteration_count < max_iterations:
             results = sp.show_episodes(
                 show_id,
                 limit=limit_per_request,
@@ -125,6 +142,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 break
             
             offset += limit_per_request
+            iteration_count += 1
+        
+        if iteration_count >= max_iterations:
+            logging.warning(f"Reached maximum iteration limit ({max_iterations}) when fetching episodes")
 
         # Store results in Blob Storage
         blob_container = os.environ.get('BLOB_CONTAINER_NAME', 'podcast-episodes')
@@ -174,8 +195,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     except Exception as e:
-        logging.error(f"Error in GetPodcastEpisodes: {str(e)}")
+        logging.error(f"Error in GetPodcastEpisodes: {str(e)}", exc_info=True)
         return func.HttpResponse(
-            f"An error occurred: {str(e)}",
+            "An unexpected error occurred. Please check the logs or contact support.",
             status_code=500
         )

@@ -7,7 +7,7 @@ resource "azurerm_resource_group" "main" {
 
 # Storage Account for Function App and Blob Storage
 resource "azurerm_storage_account" "main" {
-  name                     = "podcastsa${var.environment}${random_string.suffix.result}"
+  name                     = substr("podcastsa${var.environment}${random_string.suffix.result}", 0, 24)
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Standard"
@@ -79,6 +79,21 @@ resource "azurerm_key_vault" "main" {
   tags = var.tags
 }
 
+# Key Vault Access Policy for Terraform deployment principal
+resource "azurerm_key_vault_access_policy" "terraform" {
+  key_vault_id = azurerm_key_vault.main.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+  
+  secret_permissions = [
+    "Get",
+    "List",
+    "Set",
+    "Delete",
+    "Purge"
+  ]
+}
+
 # Key Vault Secrets
 resource "azurerm_key_vault_secret" "spotify_client_id" {
   name         = "spotify-client-id"
@@ -86,7 +101,7 @@ resource "azurerm_key_vault_secret" "spotify_client_id" {
   key_vault_id = azurerm_key_vault.main.id
   
   depends_on = [
-    azurerm_key_vault_access_policy.function_app
+    azurerm_key_vault_access_policy.terraform
   ]
 }
 
@@ -96,7 +111,7 @@ resource "azurerm_key_vault_secret" "spotify_client_secret" {
   key_vault_id = azurerm_key_vault.main.id
   
   depends_on = [
-    azurerm_key_vault_access_policy.function_app
+    azurerm_key_vault_access_policy.terraform
   ]
 }
 
@@ -106,7 +121,7 @@ resource "azurerm_key_vault_secret" "text_analytics_key" {
   key_vault_id = azurerm_key_vault.main.id
   
   depends_on = [
-    azurerm_key_vault_access_policy.function_app
+    azurerm_key_vault_access_policy.terraform
   ]
 }
 
